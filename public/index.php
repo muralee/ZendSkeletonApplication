@@ -1,40 +1,27 @@
 <?php
-use Zend\Loader\AutoloaderFactory;
-use Zend\ServiceManager\ServiceManager;
-use Zend\Mvc\Service\ServiceManagerConfiguration;
 
+
+/**
+ * Display all errors when APPLICATION_ENV is development.
+ */
+if ($_SERVER['APPLICATION_ENV'] == 'development') {
+    error_reporting(E_ALL);
+    ini_set("display_errors", 1);
+}
+
+/**
+ * This makes our life easier when dealing with paths. Everything is relative
+ * to the application root now.
+ */
 chdir(dirname(__DIR__));
 
-// Composer autoloading
-if (file_exists('vendor/autoload.php')) {
-    $loader = include 'vendor/autoload.php';
+// Decline static file requests back to the PHP built-in webserver
+if (php_sapi_name() === 'cli-server' && is_file(__DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH))) {
+    return false;
 }
 
-// Support for ZF2_PATH environment variable or git submodule
-if ($zf2Path = getenv('ZF2_PATH') ?: (is_dir('vendor/ZF2/library') ? 'vendor/ZF2/library' : false)) {
-    if (isset($loader)) {
-        $loader->add('Zend', $zf2Path . '/Zend');
-    } else {
-        include $zf2Path . '/Zend/Loader/AutoloaderFactory.php';
-        AutoloaderFactory::factory(array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'autoregister_zf' => true
-            )
-        ));
-    }
-}
+// Setup autoloading
+require 'init_autoloader.php';
 
-if (!class_exists('Zend\Loader\AutoloaderFactory')) {
-    throw new RuntimeException('Unable to load ZF2. Run `php composer.phar install` or define a ZF2_PATH environment variable.');
-}
-
-// Get application stack configuration
-$configuration = include 'config/application.config.php';
-
-// Setup service manager
-$serviceManager = new ServiceManager(new ServiceManagerConfiguration($configuration['service_manager']));
-$serviceManager->setService('ApplicationConfiguration', $configuration);
-$serviceManager->get('ModuleManager')->loadModules();
-
-// Run application
-$serviceManager->get('Application')->bootstrap()->run()->send();
+// Run the application!
+Zend\Mvc\Application::init(require 'config/application.config.php')->run();

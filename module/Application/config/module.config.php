@@ -1,36 +1,98 @@
 <?php
+/**
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
+ * @copyright Copyright (c) 2005-2013 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ */
+
 return array(
     'router' => array(
         'routes' => array(
-            'default' => array(
-                'type'    => 'Zend\Mvc\Router\Http\Segment',
-                'options' => array(
-                    'route'    => '/[:controller[/:action]]',
-                    'constraints' => array(
-                        'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                        'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
-                    ),
-                    'defaults' => array(
-                        'controller' => 'index',
-                        'action'     => 'index',
-                    ),
-                ),
-            ),
             'home' => array(
                 'type' => 'Zend\Mvc\Router\Http\Literal',
                 'options' => array(
                     'route'    => '/',
                     'defaults' => array(
-                        'controller' => 'index',
+                        'controller' => 'User\Controller\User',
                         'action'     => 'index',
+						'lang'		 => 'en',
+                    ),
+                ),
+				'may_terminate' => true,
+                'child_routes' => array(
+                    'language' => array(
+                        'type'    => 'Application\Router\Segment\ApplicationRouter',
+                        'options' => array(
+                            'route'    => '[:lang]',
+                            'constraints' => array(
+                                'lang'       => '(en|ar)?',
+                            ),
+                            'defaults' => array(
+                                'lang' => 'en',
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            // The following is a route to simplify getting started creating
+            // new controllers and actions without needing to create a new
+            // module. Simply drop new controllers in, and you can access them
+            // using the path /application/:controller/:action
+            'application' => array(
+                'type'    => 'Literal',
+                'options' => array(
+                    'route'    => '/application',
+                    'defaults' => array(
+                        '__NAMESPACE__' => 'Application\Controller',
+                        'controller'    => 'Index',
+                        'action'        => 'index',
+                    ),
+                ),
+                'may_terminate' => true,
+                'child_routes' => array(
+                    'default' => array(
+                        'type'    => 'Application\Router\Segment\ApplicationRouter', /*'Segment',*/
+                        'options' => array(
+                            'route'    => '/[:lang[/:controller[/:action]]]',
+                            'constraints' => array(
+								'lang'		 => '(en|ar)?',
+                                'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+                            ),
+                            'defaults' => array(
+								'lang' => 'en',
+                            ),
+                        ),
                     ),
                 ),
             ),
         ),
     ),
-    'controller' => array(
-        'classes' => array(
-            'index' => 'Application\Controller\IndexController'
+    'service_manager' => array(
+        'abstract_factories' => array(
+            'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+            'Zend\Log\LoggerAbstractServiceFactory',
+        ),
+        'aliases' => array(
+            'translator' => 'MvcTranslator',
+        ),
+    ),
+    'translator' => array(
+        'locale' => 'en_US',
+        'translation_file_patterns' => array(
+            array(
+                'type'     => 'gettext',
+                'base_dir' => __DIR__ . '/../language',
+                'pattern'  => '%s.mo',
+            ),
+        ),
+    ),
+    'controllers' => array(
+        'invokables' => array(
+            'Application\Controller\Index' => 'Application\Controller\IndexController',
+			'User\Controller\User' => 'User\Controller\UserController',
         ),
     ),
     'view_manager' => array(
@@ -47,6 +109,13 @@ return array(
         ),
         'template_path_stack' => array(
             __DIR__ . '/../view',
+        ),
+    ),
+    // Placeholder for console routes
+    'console' => array(
+        'router' => array(
+            'routes' => array(
+            ),
         ),
     ),
 );

@@ -4,7 +4,7 @@ body {
 }
 
 .zf-green {
-    color: #68b604; 
+    color: #68b604;
 }
 
 .btn-success {
@@ -27,11 +27,39 @@ body {
 }
 
 .btn-success:active, .btn-success.active {
-  background-color: #57a900 \9;
+  background-color: #57a900;
 }
 
 div.container a.brand {
-    background: url("../images/zf2-logo.png") no-repeat scroll 0 10px transparent;
+    background: url("../img/zf2-logo.png") no-repeat scroll 0 10px transparent;
     margin-left: 0;
     padding: 8px 20px 12px 40px;
+}
+
+footer {
+	position:fixed;
+	bottom:0;
+	left:0;
+	right:0;
+	text-align:center;
+	background-color:#2E2E2E;
+	color:#fff;
+	padding:10px 0;
+}
+
+form label {
+	display:block;
+	padding: 5px 0;
+	
+	border-bottom:1px solid #f2f2f2;
+}
+
+form label span {
+	padding:0 10px;
+}
+
+input[type="text"] {
+	border:1px inset gray;
+	padding:5px;
+	width:250px;
 }
